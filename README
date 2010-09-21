@@ -1,0 +1,45 @@
+HashConfig
+-----------
+
+A couple of libraries for representing configuration data as a Hash.
+
+The libraries are designed using a common Role, and support multiple
+parsers for data types. The default parser is HashConfig::Parser::JSON
+which uses the JSON::Tiny library.
+
+HashConfig::Magic
+
+Basically, a HashConfig::Magic object works just like a normal Hash, 
+except that it has methods such as loadFile() and load() which will parse 
+a serialized data format and merge the contents into the Hash.
+
+It defines special key names and values for dealing with merging data.
+
+If a key name starts with +, then the value will be appending to an array
+(which will be created automatically if the current value is not an array.)
+If the value itself is an array, each item in that array will be appended to
+the target array.
+
+If a key name starts with ~, then the value will be inserted in an array.
+See the + modifier for a description of how this works.
+
+If the key name starts with -, then the value specifies the number of
+entries to remove from the bottom or top of the array. Use negative numbers
+to remove from the top of the array (shift), or positive numbers to 
+remove from the bottom of the array (pop).
+
+If the value is set to ~~ then the key will be deleted from the Hash.
+
+If the key is called 'INCLUDE', it will load the value as an additional file.
+If the value is 'INCLUDE:filename' the file will be loaded into the key.
+
+HashConfig::File
+
+A simpler library than the above one. HashConfig::File is specifically for
+loading configuration files (no strings, no merging) into a Hash.
+It has load() and save() methods, and save() can optionally take a new
+filename.
+
+Author: Timothy Totten
+License: Artistic License 2.0
+
