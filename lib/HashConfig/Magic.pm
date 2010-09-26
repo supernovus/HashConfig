@@ -49,7 +49,7 @@ method merge (%data, %section=self) {
       my $key = $k.subst(/^'+'/, '');
       say "Appending $key" if $.debug;
       if ($v ~~ Array) {
-        for $v -> $sv {
+        for @($v) -> $sv {
           %section.push($key => $v);
         }
       }
@@ -58,10 +58,10 @@ method merge (%data, %section=self) {
       }
     }
     elsif $k ~~ /^'~'/ {
-      my $key = $k.subst(/^'-'/, '');
+      my $key = $k.subst(/^'~'/, '');
       say "Inserting $key" if $.debug;
       if ($v ~~ Array) {
-        for $v -> $sv {
+        for @($v) -> $sv {
           self!unshift_construct(%section, $key, $sv);
         }
       }
