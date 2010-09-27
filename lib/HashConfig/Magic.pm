@@ -41,8 +41,25 @@ method !unshift_construct(%hash, $key, $val) {
   }
 }
 
+## Used by merge to include block level stuf.
+method !include(%section is rw, $file) {
+  if %section ~~ HashConfig {
+    %section.loadFile($file);
+  }
+  else {
+    my %newsection = self.make(:file($file));
+    self.merge(%newsection, %section);
+  }
+  return %section;
+}
+
 ## New magic merge method with special rules for merging.
 method merge (%data, %section=self) {
+  ## First we check for block level INCLUDE.
+  if %data.exists('INCLUDE') {
+    self!include(%section, %data<INCLUDE>);
+  }
+  ## Now we process normal rules.
   for %data.kv -> $k, $v {
     say "merging $k => "~$v.perl if $.debug;
     if $k ~~ /^'+'/ {
@@ -50,7 +67,7 @@ method merge (%data, %section=self) {
       say "Appending $key" if $.debug;
       if ($v ~~ Array) {
         for @($v) -> $sv {
-          %section.push($key => $v);
+          %section.push($key => $sv);
         }
       }
       else {
@@ -83,15 +100,12 @@ method merge (%data, %section=self) {
       }
     }
     elsif ($k eq 'INCLUDE') {
-      if %section ~~ HashConfig {
-        %section.loadFile($v);
-      }
-      else {
-        my %newsection = self.make(:file($v));
-        %section.delete($k); ## Avoid infinite loops.
-        self.merge(%newsection, %section);
-      }
+      next; ## skip INCLUDE statements.
     }
+    elsif ($k eq 'POSTINCLUDE') {
+      next; ## skip POSTINCLUDE statements.
+    }
+    ## A special type of INCLUDE, a way to set a key to the contents of a file.
     elsif ($v ~~ Str && $v ~~ /INCLUDE ':' (.*)/) {
       %section{$k} = self.parseFile($0);
     }
@@ -107,6 +121,12 @@ method merge (%data, %section=self) {
       %section{$k} = $v;
     }
   }
+  ## Next we check for block level POSTINCLUDE.
+  if %data.exists('POSTINCLUDE') {
+    self!include(%section, %data<INCLUDE>);
+  }
+
+  ## Finally, we return the section.
   return %section;
 }
 
