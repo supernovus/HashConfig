@@ -1,0 +1,8 @@
+{
+  "name"        : "HashConfig",
+  "version"     : "*",
+  "description" : "Configuration data file libraries",
+  "depends"     : [ "JSON::Tiny" ],
+  "repo-type"   : "git",
+  "repo-url"    : "git://github.com/supernovus/HashConfig.git"
+}
